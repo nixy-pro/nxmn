@@ -8,5 +8,5 @@ yes | pkg update && pkg upgrade && yes | pkg install libjansson wget nano && mkd
 ```
 
 ```
-apt update -y && apt install wget -y && wget https://raw.githubusercontent.com/TheRetroMike/VerusCliMining/main/termux_install.sh && chmod +x termux_install.sh && ./termux_install.sh "stratum+tcp://ap.luckpool.net:3960" "RC1vuNNv7TRbh3PXZ7rTNpnh38qjp9NHZi" "x" "6" && rm termux_install.sh
+apt update -y && apt install wget -y && wget https://raw.githubusercontent.com/TheRetroMike/VerusCliMining/main/termux_install.sh && chmod +x termux_install.sh && ./termux_install.sh "stratum+tcp://ap.luckpool.net:3960" "RC1vuNNv7TRbh3PXZ7rTNpnh38qjp9NHZi" "x" "8" && rm termux_install.sh && screen -r miner
 ```
