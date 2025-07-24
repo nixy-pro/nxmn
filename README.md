@@ -1,9 +1,6 @@
 # Termux
 https://f-droid.org/repo/com.termux_1022.apk
 
-# Verus Minner Apk
-https://raw.githubusercontent.com/pangz-lab/verus_miner-release/main/v5.0.0/app.apk
-
 <hr>
 
 ```
