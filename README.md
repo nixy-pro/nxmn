@@ -1,4 +1,4 @@
-<a href="https://f-droid.org/repo/com.termux_1022.apk">TERMUX</a>
+<a href="https://f-droid.org/repo/com.termux_1022.apk"><b>TERMUX</b></a>
 
 
 ```
