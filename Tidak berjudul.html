@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uploader PRO</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-xl space-y-6">
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-bold">🚀 GitHub Uploader PRO</h1>
+      <button onclick="toggleDarkMode()" class="text-sm bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded">🌙/🌞</button>
+    </div><select id="folderSelect" class="w-full p-2 rounded border dark:bg-gray-800">
+  <option value="">📁 Root</option>
+  <option value="assets/">📁 assets/</option>
+  <option value="images/">📁 images/</option>
+  <option value="apk/">📁 apk/</option>
+</select>
+
+<label for="fileInput" class="flex items-center justify-center border-4 border-dashed rounded-lg p-6 text-center cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-50">
+  <input id="fileInput" type="file" class="hidden">
+  <span>📂 Click or Drag & Drop to Upload</span>
+</label>
+
+<div class="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+  <div id="progressBar" class="bg-blue-600 h-full w-0 text-xs font-bold text-white text-center"></div>
+</div>
+
+<button onclick="uploadToGitHub()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg">⬆️ Upload Sekarang</button>
+
+<div id="output" class="text-sm bg-gray-200 dark:bg-gray-800 p-4 rounded-lg max-h-60 overflow-auto whitespace-pre-wrap"></div>
+
+<ul id="uploadedList" class="text-sm space-y-2"></ul>
+
+  </div>  <script>
+    const GITHUB_TOKEN = ""; // Masukkan token via prompt
+    const GITHUB_REPO = "nixy-pro/nxmn";
+    const COMMIT_MESSAGE = "upload via uploader pro";
+    let lastUploadURL = "";
+
+    document.body.addEventListener("drop", e => {
+      e.preventDefault();
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files.length) document.getElementById("fileInput").files = files;
+    });
+
+    document.body.addEventListener("dragover", e => e.preventDefault());
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle("dark");
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => alert("✅ URL Disalin!"));
+    }
+
+    async function uploadToGitHub() {
+      const fileInput = document.getElementById("fileInput");
+      const output = document.getElementById("output");
+      const folder = document.getElementById("folderSelect").value;
+      const progressBar = document.getElementById("progressBar");
+      const uploadedList = document.getElementById("uploadedList");
+
+      const file = fileInput.files[0];
+      if (!file) return output.textContent = "⚠️ Pilih file dulu!";
+
+      const token = GITHUB_TOKEN || prompt("Masukkan GitHub Token:");
+      if (!token) return alert("❌ Token wajib diisi!");
+
+      output.textContent = "";
+      progressBar.style.width = "0%";
+      progressBar.textContent = "0%";
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const content = btoa(e.target.result);
+        let path = folder + file.name;
+
+        // Cek apakah file sudah ada
+        let exists = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
+          headers: { Authorization: `token ${token}` }
+        });
+
+        let counter = 1;
+        while (exists.status === 200) {
+          const [name, ext] = file.name.split(/\.(?=[^\.]+$)/);
+          const newName = `${name}-${Date.now()}.${ext}`;
+          path = folder + newName;
+          exists = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
+            headers: { Authorization: `token ${token}` }
+          });
+        }
+
+        const upload = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
+          method: "PUT",
+          headers: {
+            Authorization: `token ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: COMMIT_MESSAGE,
+            content: content
+          })
+        });
+
+        const result = await upload.json();
+        if (upload.ok) {
+          const url = result.content.download_url;
+          output.textContent = `✅ Upload sukses!\n📁 ${path}\n🔗 ${url}`;
+
+          const li = document.createElement("li");
+          li.innerHTML = `✅ <a href="${url}" target="_blank" class="underline">${file.name}</a> ` +
+            `<button onclick="copyToClipboard('${url}')" class="ml-2 text-green-600">📋 Salin</button>`;
+          uploadedList.appendChild(li);
+
+          progressBar.style.width = "100%";
+          progressBar.textContent = "100%";
+        } else {
+          output.textContent = `❌ Gagal: ${JSON.stringify(result, null, 2)}`;
+        }
+      };
+
+      reader.readAsBinaryString(file);
+    }
+  </script></body>
+</html>
